@@ -1,0 +1,15 @@
+-- CreateTable
+CREATE TABLE "Chunk" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "chunkIndex" INTEGER NOT NULL,
+    "pageNumber" INTEGER,
+    "tokenCount" INTEGER NOT NULL,
+    "documentId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Chunk_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Chunk" ADD CONSTRAINT "Chunk_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "Document"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

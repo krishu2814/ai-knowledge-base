@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  knowledgeBases KnowledgeBase[]
+}
+
+// status of the knowledge base
+enum KnowledgeBaseStatus {
+  CREATING
+  PROCESSING
+  READY
+  FAILED
+}
+
+// Knowledge base model, which contains documents
+model KnowledgeBase {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  status      KnowledgeBaseStatus @default(CREATING)
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  owner User @relation(fields: [ownerId], references: [id])
+  documents Document[]
+  conversations Conversation[]
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+// documents uploaded to the knowledge base
+model Document {
+  id            String         @id @default(cuid())
+  title         String
+  originalName  String
+  storagePath   String
+  mimeType      String
+  size          Int
+  status        DocumentStatus @default(UPLOADED)
+  knowledgeBaseId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id])
+  chunks        Chunk[]
+}
+
+// chunks of the document, used for embedding and retrieval
+model Chunk {
+  id          String   @id @default(cuid())
+  content     String
+  chunkIndex  Int
+  pageNumber  Int?
+  tokenCount  Int
+  documentId  String
+  createdAt   DateTime @default(now())
+  document Document @relation(fields: [documentId], references: [id])
+}
+
+// Conversation model, which contains messages
+model Conversation {
+  id              String   @id @default(cuid())
+  title           String
+  knowledgeBaseId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id])
+  messages Message[]
+}
+
+// Message model, which contains the messages in a conversation
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  role           MessageRole
+  content        String
+  conversationId String
+  createdAt      DateTime @default(now())
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+}
