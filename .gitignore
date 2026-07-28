@@ -28,3 +28,9 @@ coverage/
 *.tmp
 
 /src/generated/prisma
+
+# Prisma AI editor integrations
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
