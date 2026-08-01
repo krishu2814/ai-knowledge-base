@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env.js";
 
 export interface AuthRequest extends Request {
-  user?: {
+  user: {
     userId: string;
   };
 }

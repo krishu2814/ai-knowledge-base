@@ -1,30 +1,33 @@
 import { Router } from "express";
 
-import * as knowledgeBaseController from "./knowledge-base.controller.js";
+import { KnowledgeBaseController } from "./knowledge-base.controller.js";
 import { authMiddleware } from "../auth/auth.middleware.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 
 const router = Router();
 
-router.post("/", authMiddleware, knowledgeBaseController.createKnowledgeBase);
+const knowledgeBaseController = new KnowledgeBaseController();
 
-router.get("/", authMiddleware, knowledgeBaseController.getKnowledgeBases);
+router.post("/", authMiddleware, asyncHandler(knowledgeBaseController.create));
 
-// router.get(
-//   "/:id",
-//   authMiddleware,
-//   knowledgeBaseController.getKnowledgeBaseById,
-// );
+router.get("/", authMiddleware, asyncHandler(knowledgeBaseController.findAll));
 
-// router.patch(
-//   "/:id",
-//   authMiddleware,
-//   knowledgeBaseController.updateKnowledgeBase,
-// );
+router.get(
+  "/:id",
+  authMiddleware,
+  asyncHandler(knowledgeBaseController.findById),
+);
 
-// router.delete(
-//   "/:id",
-//   authMiddleware,
-//   knowledgeBaseController.deleteKnowledgeBase,
-// );
+router.patch(
+  "/:id",
+  authMiddleware,
+  asyncHandler(knowledgeBaseController.update),
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  asyncHandler(knowledgeBaseController.delete),
+);
 
 export default router;

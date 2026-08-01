@@ -1,76 +1,67 @@
-import prisma from "../../lib/prisma.js";
-
+import { ApiError } from "../../utils/ApiError.js";
+import { KnowledgeBaseRepository } from "./knowledge-base.repository.js";
 import type {
   CreateKnowledgeBaseDto,
   UpdateKnowledgeBaseDto,
 } from "./knowledge-base.types.js";
 
-// Create knowledge base
-export const createKnowledgeBase = async (
-  ownerId: string,
-  dto: CreateKnowledgeBaseDto,
-) => {
-  return prisma.knowledgeBase.create({
-    data: {
+export class KnowledgeBaseService {
+  private readonly repository: KnowledgeBaseRepository;
+
+  constructor() {
+    this.repository = new KnowledgeBaseRepository();
+  }
+
+  async create(ownerId: string, dto: CreateKnowledgeBaseDto) {
+    return this.repository.create({
       ...dto,
       ownerId,
-    },
-  });
-};
+    });
+  }
 
-// Get all knowledge bases of a user
-export const getKnowledgeBases = async (ownerId: string) => {
-  return prisma.knowledgeBase.findMany({
-    where: {
-      ownerId,
-      deletedAt: null,
-    },
+  async findAll(ownerId: string) {
+    return this.repository.findAllByUser(ownerId);
+  }
 
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-};
+  async findById(id: string, ownerId: string) {
+    const knowledgeBase = await this.repository.findById(id);
 
-// Get single knowledge base by id
-export const getKnowledgeBaseById = async (id: string, ownerId: string) => {
-  return prisma.knowledgeBase.findFirst({
-    where: {
-      id,
-      ownerId,
-      deletedAt: null,
-    },
-  });
-};
+    if (
+      !knowledgeBase ||
+      knowledgeBase.ownerId !== ownerId ||
+      knowledgeBase.deletedAt
+    ) {
+      throw new ApiError(404, "Knowledge base not found");
+    }
 
-// Update knowledge base
-export const updateKnowledgeBase = async (
-  id: string,
-  ownerId: string,
-  dto: UpdateKnowledgeBaseDto,
-) => {
-  return prisma.knowledgeBase.updateMany({
-    where: {
-      id,
-      ownerId,
-      deletedAt: null,
-    },
+    return knowledgeBase;
+  }
 
-    data: dto,
-  });
-};
+  async update(id: string, ownerId: string, dto: UpdateKnowledgeBaseDto) {
+    const knowledgeBase = await this.repository.findById(id);
 
-// Soft delete knowledge base
-export const deleteKnowledgeBase = async (id: string, ownerId: string) => {
-  return prisma.knowledgeBase.updateMany({
-    where: {
-      id,
-      ownerId,
-      deletedAt: null,
-    },
+    if (
+      !knowledgeBase ||
+      knowledgeBase.ownerId !== ownerId ||
+      knowledgeBase.deletedAt
+    ) {
+      throw new ApiError(404, "Knowledge base not found");
+    }
 
-    data: {
-      deletedAt: new Date(),
-    },
-  });
-};
+    return this.repository.update(id, dto);
+  }
+
+  async delete(id: string, ownerId: string) {
+    const knowledgeBase = await this.repository.findById(id);
+
+    if (
+      !knowledgeBase ||
+      knowledgeBase.ownerId !== ownerId ||
+      knowledgeBase.deletedAt
+    ) {
+      throw new ApiError(404, "Knowledge base not found");
+    }
+
+    await this.repository.softDelete(id);
+  }
+}
