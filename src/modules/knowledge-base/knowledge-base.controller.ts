@@ -6,57 +6,83 @@ type IdParams = {
   id: string;
 };
 
-export const createKnowledgeBase = async (req: Request, res: Response) => {
-  // temp user id
-  const ownerId = "user_1";
+interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+  };
+}
+
+// Create knowledge base
+export const createKnowledgeBase = async (req: AuthRequest, res: Response) => {
+  const ownerId = req.user!.userId;
 
   const knowledgeBase = await knowledgeBaseService.createKnowledgeBase(
     ownerId,
     req.body,
   );
 
-  res.status(201).json(knowledgeBase);
+  res.status(201).json({
+    success: true,
+    data: knowledgeBase,
+  });
 };
 
-export const getKnowledgeBases = async (req: Request, res: Response) => {
-  const ownerId = "user_1";
+// Get all knowledge bases
+export const getKnowledgeBases = async (req: AuthRequest, res: Response) => {
+  const ownerId = req.user!.userId;
+
   const kbs = await knowledgeBaseService.getKnowledgeBases(ownerId);
 
-  res.status(200).json(kbs);
+  res.status(200).json({
+    success: true,
+    data: kbs,
+  });
 };
 
+// Get knowledge base by id
 export const getKnowledgeBaseById = async (
-  req: Request<IdParams>,
+  req: AuthRequest & Request<IdParams>,
   res: Response,
 ) => {
-  const ownerId = "user_1";
+  const ownerId = req.user!.userId;
+
   const kb = await knowledgeBaseService.getKnowledgeBaseById(
     req.params.id,
     ownerId,
   );
 
-  res.status(200).json(kb);
+  res.status(200).json({
+    success: true,
+    data: kb,
+  });
 };
 
+// Update knowledge base
 export const updateKnowledgeBase = async (
-  req: Request<IdParams>,
+  req: AuthRequest & Request<IdParams>,
   res: Response,
 ) => {
-  const ownerId = "user_1";
+  const ownerId = req.user!.userId;
+
   const kb = await knowledgeBaseService.updateKnowledgeBase(
     req.params.id,
     ownerId,
     req.body,
   );
 
-  res.status(200).json(kb);
+  res.status(200).json({
+    success: true,
+    data: kb,
+  });
 };
 
+// Delete knowledge base
 export const deleteKnowledgeBase = async (
-  req: Request<IdParams>,
+  req: AuthRequest & Request<IdParams>,
   res: Response,
 ) => {
-  const ownerId = "user_1";
+  const ownerId = req.user!.userId;
+
   await knowledgeBaseService.deleteKnowledgeBase(req.params.id, ownerId);
 
   res.status(204).send();

@@ -1,17 +1,30 @@
 import { Router } from "express";
 
 import * as knowledgeBaseController from "./knowledge-base.controller.js";
+import { authMiddleware } from "../auth/auth.middleware.js";
 
 const router = Router();
 
-router.post("/", knowledgeBaseController.createKnowledgeBase);
+router.post("/", authMiddleware, knowledgeBaseController.createKnowledgeBase);
 
-router.get("/", knowledgeBaseController.getKnowledgeBases);
+router.get("/", authMiddleware, knowledgeBaseController.getKnowledgeBases);
 
-router.get("/:id", knowledgeBaseController.getKnowledgeBaseById);
+// router.get(
+//   "/:id",
+//   authMiddleware,
+//   knowledgeBaseController.getKnowledgeBaseById,
+// );
 
-router.patch("/:id", knowledgeBaseController.updateKnowledgeBase);
+// router.patch(
+//   "/:id",
+//   authMiddleware,
+//   knowledgeBaseController.updateKnowledgeBase,
+// );
 
-router.delete("/:id", knowledgeBaseController.deleteKnowledgeBase);
+// router.delete(
+//   "/:id",
+//   authMiddleware,
+//   knowledgeBaseController.deleteKnowledgeBase,
+// );
 
 export default router;

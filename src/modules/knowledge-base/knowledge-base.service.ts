@@ -1,9 +1,11 @@
 import prisma from "../../lib/prisma.js";
+
 import type {
   CreateKnowledgeBaseDto,
   UpdateKnowledgeBaseDto,
 } from "./knowledge-base.types.js";
 
+// Create knowledge base
 export const createKnowledgeBase = async (
   ownerId: string,
   dto: CreateKnowledgeBaseDto,
@@ -16,19 +18,21 @@ export const createKnowledgeBase = async (
   });
 };
 
+// Get all knowledge bases of a user
 export const getKnowledgeBases = async (ownerId: string) => {
   return prisma.knowledgeBase.findMany({
     where: {
       ownerId,
       deletedAt: null,
     },
+
     orderBy: {
-      // in descending order of creation date
       createdAt: "desc",
     },
   });
 };
 
+// Get single knowledge base by id
 export const getKnowledgeBaseById = async (id: string, ownerId: string) => {
   return prisma.knowledgeBase.findFirst({
     where: {
@@ -39,26 +43,32 @@ export const getKnowledgeBaseById = async (id: string, ownerId: string) => {
   });
 };
 
+// Update knowledge base
 export const updateKnowledgeBase = async (
   id: string,
   ownerId: string,
   dto: UpdateKnowledgeBaseDto,
 ) => {
-  return prisma.knowledgeBase.update({
+  return prisma.knowledgeBase.updateMany({
     where: {
       id,
       ownerId,
       deletedAt: null,
     },
+
     data: dto,
   });
 };
-// Soft delete the knowledge base by setting the deletedAt field to the current date and time
+
+// Soft delete knowledge base
 export const deleteKnowledgeBase = async (id: string, ownerId: string) => {
-  return prisma.knowledgeBase.update({
+  return prisma.knowledgeBase.updateMany({
     where: {
       id,
+      ownerId,
+      deletedAt: null,
     },
+
     data: {
       deletedAt: new Date(),
     },
